@@ -1,0 +1,230 @@
+//configura o joystick
+
+int pinVRx = A2; //Conectado a entrada Analogica 2
+int pinVRy = A1; // "                          " 1
+int pinSW = 8; // pino digital 8
+
+
+
+
+//motor_A
+int IN1 = 2 ; // pino digital 2 ligado da Enable 1 da ponte h
+int IN2 = 4 ; // pino digital 2 ligado no Enable 2 da ponte h
+int velocidadeA = 9; // pino digital 3 ligado ao pino de pwm da ponte h
+
+/*Os pinos 2 e 4 controlam o sentido de rotação do motor A, enquanto que o pino 3 e o sinal pwm que controla a velocidade do motor
+
+  A tabela verdade e o seguinte
+
+  IN1     1N2  Estado
+
+  0v       0v  Desligado
+  0v       5v  Sentido horario
+  5v       0v  Sentido anti-horario
+  5v       5v   Desligado
+
+  A mesma tabela vale para o motor 2, podemos entao criar funcoes para escolher o sentido do motor
+
+  void gira_motor(int motor, int sentido)
+  {
+
+  if( motor == 1) //caso a variavel motor seja 1
+  {
+  if (sentido == 1)
+     {
+      digitalWrite(IN1, LOW);
+      digitalWrite(IN2, HIGH);
+     }
+  else
+     {
+       if (sentido == 2)
+      {
+       digitalWrite(IN1, HIGH);
+       digitalWrite(IN2, LOW);
+       }
+      else
+      {
+      digitalWrite(IN1, LOW);
+       digitalWrite(IN2, LOW);
+
+      }
+    }
+
+  }
+  else//quer dizer que foi selecionado o motor 2
+  {
+
+  if (sentido == 1)
+     {
+      digitalWrite(IN3, LOW);
+      digitalWrite(IN4, HIGH);
+     }
+  else
+     {
+       if (sentido == 2)
+      {
+       digitalWrite(IN3, HIGH);
+       digitalWrite(IN4, LOW);
+       }
+      else
+      {
+      digitalWrite(IN3, LOW);
+       digitalWrite(IN4, LOW);
+
+      }
+    }
+
+  }
+
+
+  }
+
+*/
+
+
+//motor_B
+
+//Os pinos 2 e 4 controlam o sentido de rotação do motor A, enquanto que o pino 3 e o sinal pwm que controla a velocidade do motor
+
+int IN3 = 6 ; // pino digital 6 ligado da Enable 2 da ponte h
+int IN4 = 7 ; //pino digital 7 ligado no Enable 2 da ponte h
+int velocidadeB = 10; // pino digital 5 ligado ao pino de pwm da ponte h
+
+
+
+
+//Inicializa Pinos
+void setup() {
+
+  //No setup realizamos as configurações dos nossos pinos
+
+  //joystick
+  pinMode(pinVRx, INPUT);//configurando o pinVRx como entrada de dados
+  pinMode(pinVRy, INPUT);//configurando o pinVry como entrada de dados
+  pinMode(pinSW, INPUT_PULLUP);//configurando pinSw como entrda e ativando o resistor de pull up
+
+  //motor1
+
+  pinMode(IN1, OUTPUT); //configura o pinot IN1 como saida
+  pinMode(IN2, OUTPUT); //""
+  pinMode(IN3, OUTPUT); //""
+  pinMode(IN4, OUTPUT); //""
+
+  pinMode(velocidadeA, OUTPUT); //pinos de pwm
+  pinMode(velocidadeB, OUTPUT); //pinos de pwm
+
+
+
+
+  Serial.begin(9600);
+
+}
+
+void loop() {
+
+  //Aqui configurações o que nosso arduino fara em loop
+  //com este modelo de codigo voce envia o dado via serial monitor e altera em tempo real no arduino
+
+
+  int valorVRx = analogRead(pinVRx);// variavel que recebe o valor lido no pinVrx
+  int valorVRy = analogRead(pinVRy);//variavel que recebe o valor lido no pinVry
+  bool statusSW = digitalRead(pinSW);//variavel que recebe o valor lido no pino digital pinSw
+
+  int valorvelocidadeA = map(valorVRx, 0, 1023, 0, 254);
+  int valorvelocidadeB = map(valorVRy, 0, 1023, 0, 254);
+
+
+  Serial.println(valorvelocidadeA);
+  Serial.println(valorvelocidadeB);
+
+  analogWrite(velocidadeA, valorvelocidadeA);
+  analogWrite(velocidadeB, valorvelocidadeB);
+
+  //neutro 523
+  // 0 ate 523 = pra frente convertido, 0 ate 127
+  // 523 ate 2014 = pra tras convertido, 127 ate 255
+
+  //pra frente e pra tras eixo x
+
+  if (valorvelocidadeA >= 0 && valorvelocidadeA < 127)
+  {
+    gira_motor(1, 1);
+    gira_motor(2, 1);
+  }
+  if (valorvelocidadeA > 127 && valorvelocidadeA <= 255)
+  {
+    gira_motor(1, 2);
+    gira_motor(2, 2);
+  }
+
+  // pros lados, eixo y
+  if (valorvelocidadeB >= 0 && valorvelocidadeB < 127)
+  {
+    gira_motor(1, 1);
+    gira_motor(2, 0);
+  }
+  if (valorvelocidadeB > 127 && valorvelocidadeB <= 255)
+  {
+    gira_motor(1, 0);
+    gira_motor(2, 1);
+  }
+
+
+}
+
+
+//funcao gira_motor, para usa-la informe um numero para o motor(1 ou 2), e numero para sentido(1, horario, 2, anti horario, 0, desligado);
+
+void gira_motor(int motor, int sentido)
+{
+
+  if ( motor == 1) //caso a variavel motor seja 1
+  {
+    if (sentido == 1)
+    {
+      digitalWrite(IN1, LOW);
+      digitalWrite(IN2, HIGH);
+    }
+    else
+    {
+      if (sentido == 2)
+      {
+        digitalWrite(IN1, HIGH);
+        digitalWrite(IN2, LOW);
+      }
+      else
+      {
+        digitalWrite(IN1, LOW);
+        digitalWrite(IN2, LOW);
+
+      }
+    }
+
+  }
+  else//quer dizer que foi selecionado o motor 2
+  {
+
+    if (sentido == 1)
+    {
+      digitalWrite(IN3, LOW);
+      digitalWrite(IN4, HIGH);
+    }
+    else
+    {
+      if (sentido == 2)
+      {
+        digitalWrite(IN3, HIGH);
+        digitalWrite(IN4, LOW);
+      }
+      else
+      {
+        digitalWrite(IN3, LOW);
+        digitalWrite(IN4, LOW);
+
+      }
+    }
+
+  }
+
+
+}
